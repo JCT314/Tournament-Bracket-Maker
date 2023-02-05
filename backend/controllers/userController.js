@@ -2,6 +2,7 @@ const User = require('../models/userModel.js')
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const { find } = require('../models/userModel.js')
 
 const registerUser = asyncHandler(async(req, res) => {
     console.log(req.body)
@@ -46,7 +47,32 @@ const registerUser = asyncHandler(async(req, res) => {
 
 })
 
+const loginUser = asyncHandler(async(req, res) => {
+
+    const{username, password, email} = req.body
+
+    console.log(req.body)
+
+    const user = await User.findOne({username})
+
+    if (!user){
+        res.status(400)
+        throw new Error('User does not exist')
+    }
+
+    const checkpassword = await bcrypt.compare(password, user.password)
+
+    if(!checkpassword){
+        res.status(400)
+        throw new Error('Incorrect Password')
+    }
+
+    res.status(200).json({message: 'User and password is correct'})
+
+})
+
 module.exports = 
 {
-    registerUser
+    registerUser,
+    loginUser
 }
